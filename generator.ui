@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>generator</class>
+ <widget class="QMainWindow" name="generator">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>834</width>
+    <height>618</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>211</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Момент времени t:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="time">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="step">
+         <property name="text">
+          <string>Ручной режим</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="auto_2">
+         <property name="text">
+          <string>Автоматический режим</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="KD">
+         <property name="text">
+          <string>Построить диаграмму Ганта</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="text">
+          <string>назад</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>220</y>
+      <width>211</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QTableWidget" name="Busylist">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>191</width>
+       <height>111</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>181</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Текущая занятость машин:</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>20</y>
+      <width>561</width>
+      <height>351</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Полученный список работ:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="workSourse">
+         <column>
+          <property name="text">
+           <string>Np</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>No</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Ng</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tij</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>St</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tn</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Nm</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>S</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tv</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mop</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Список работ в процессе:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="work">
+         <column>
+          <property name="text">
+           <string>Np</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>No</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Ng</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tij</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>St</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tn</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Nm</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>S</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tv</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mop</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>370</y>
+      <width>561</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string> Файл обмена:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="FO">
+         <column>
+          <property name="text">
+           <string>Np</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>No</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Ng</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tij</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>St</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tn</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Nm</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>S</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tv</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mop</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Разрешение конфликта:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="KONF">
+         <column>
+          <property name="text">
+           <string>Np</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>No</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Ng</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tij</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>St</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tn</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Nm</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>S</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>tv</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mop</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_5">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>380</y>
+      <width>211</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QTextEdit" name="log">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>191</width>
+       <height>211</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
