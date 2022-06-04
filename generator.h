@@ -12,7 +12,7 @@ struct Twork{
     int NG;     // group
     int ti;     // время выполнения данной операции - изменяется
     int Status; // статус
-    int tn;     // время начала
+    int tn;     // время начала выполнения операции
     int S;      // сумма длит остав операций
     int nm;     // номер машины в группе
     int tv;     // время выполнения данной операции - постоянно
@@ -28,11 +28,19 @@ class generator : public QMainWindow
 
 public:
 
+//    const QMap<QString, int> status_map = {
+//        {"Н", 0},
+//        {"-", 0},
+//        {"О", 1},
+//        {"И", 2},
+//        {"З", 3},
+//        {"F", 3}
+//    };
     explicit generator(QWidget *parent = nullptr);
     ~generator();
     void creatework();
-    int Qoper,
-    Qwork,
+    int Qoper,                  // кол-во операций
+    Qwork,                      // кол-во работ
     matrix1[10][10], matrix2[10][10],matrix3[100],
     CurTime,                    //
     NR,                         // кол-во операций всего
@@ -63,7 +71,7 @@ private slots:
 private:
 
     Ui::generator *ui;
-    int getstatus(QString s);
+    int getstatus(QString s);               // возвращает статус операции
     void getworklist();
     int GetFreeM(int G);
     void ShowWorkFO(int raz, Twork *TTW);

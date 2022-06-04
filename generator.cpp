@@ -13,14 +13,33 @@ generator::~generator()
 {
     delete ui;
 }
-int generator::getstatus(QString s){
-    if (s == "Н") return 0 ;
-    else if (s == "O") return 1;
-    else if (s == "И") return 2;
-    else  return 3;
+
+int generator::getstatus(QString s)
+{
+    static QMap<QString, int> status_map = {
+        {"Н", 0},
+        {"-", 0},
+        {"О", 1},
+        {"И", 2},
+        {"З", 3},
+        {"F", 3}
+    };
+    auto item = status_map.find(s);
+    if (item == status_map.end() ){
+       return 0;
+    }
+
+    return item.value();
+//    if (s == "Н" || s == "-") return 0 ;     // операция неопределена
+//    else if (s == "O") return 1;             // операция в ожидании
+//    else if (s == "И") return 2;             // операция исполняется
+//    else if (s == "З" || s == "F") return 3; // операция завершена
+//    return 0;
 }
+
 void generator::getworklist(){
 
+    //настройка таблиц
     ui->work->setRowCount(Qoper*Qwork);
     ui->work->verticalHeader()->hide();
     ui->work->horizontalHeader()->setMaximumSectionSize(50);
@@ -68,8 +87,9 @@ void generator::getworklist(){
     for (int i = 0; i < ui->work->rowCount();i++) ui->work->setRowHeight(i,25);
     for (int i = 0; i < ui->FO->rowCount();i++) ui->FO->setRowHeight(i,25);
     for (int i = 0; i < ui->KONF->rowCount();i++) ui->KONF->setRowHeight(i,25);
-
-    int a = 0;
+// ----------------------------------------------------------------------
+    //Получение списка работ
+    int a = 0; // номер строки
     for (int i = 0; i < Qwork; i++){
         for (int j = 0; j < Qoper; j++){
             ui->work->setItem(j+a,0, new QTableWidgetItem(QString::number(i+1)));
@@ -84,6 +104,7 @@ void generator::getworklist(){
         a+=Qoper;
     }
 
+    //для каждой операции рассчитываем время необходимое для выполнения всей работы
     a = 0;
     for (int i = 0; i < Qwork; i++){
         int c = 0 ;
@@ -91,16 +112,18 @@ void generator::getworklist(){
             c += matrix2[i][j];
             ui->work->setItem(j+a,7, new QTableWidgetItem(QString::number(c)));
         }
-        c = 0;
         a+=Qoper;
     }
 
+    // удаляем из списка пустые работы
     a = 0;
     do {
             if (ui->work->item(a,2)->text()=="0")
                 ui->work->removeRow(a);
             else a++;
     }while(a != ui->work->rowCount());
+
+    //очищаем массив работ
     for ( int i = 1 ; i <= 100 ; i++ ){
         W[i].N=0;
         W[i].No=0;
@@ -112,27 +135,33 @@ void generator::getworklist(){
         W[i].tv=0;
         WG[i] = 0;
     }
-    NR=ui->work->rowCount();
+    NR=ui->work->rowCount(); //кол-во всех операций
 
+    //очищаем массив AGM
     for (int i = 1; i <= NG ; i++){
         for (int j = 1 ; j < 101; j++ ){
             AGM[i][j] = 0;
         }
     }
 
-        for (int j=1; j <= NG; j++) WG[j]=matrix3[j-1];
-        for (int j=1; j <= NR; j++) {
-            W[j].N = ui->work->item(j-1,0)->text().toInt();
-            W[j].No = ui->work->item(j-1,1)->text().toInt();
-            W[j].NG = ui->work->item(j-1,2)->text().toInt();
-            W[j].ti = ui->work->item(j-1,3)->text().toInt();
-            W[j].tn = ui->work->item(j-1,5)->text().toInt();
-            W[j].S = ui->work->item(j-1,7)->text().toInt();
-            W[j].Status =getstatus(ui->work->item(j-1,4)->text());
-            W[j].nm = -1;
-            W[j].tv = ui->work->item(j-1,3)->text().toInt();
-            W[j].mOp = 1;
-        }
+    //добавляем в массив WG - массив рабочих машин
+    for (int j=1; j <= NG; j++) WG[j]=matrix3[j-1];
+
+    //заносим в массив W список работ
+    for (int j=1; j <= NR; j++) {
+        W[j].N = ui->work->item(j-1,0)->text().toInt();
+        W[j].No = ui->work->item(j-1,1)->text().toInt();
+        W[j].NG = ui->work->item(j-1,2)->text().toInt();
+        W[j].ti = ui->work->item(j-1,3)->text().toInt();
+        W[j].tn = ui->work->item(j-1,5)->text().toInt();
+        W[j].S = ui->work->item(j-1,7)->text().toInt();
+        W[j].Status =getstatus(ui->work->item(j-1,4)->text());
+        W[j].nm = -1;
+        W[j].tv = ui->work->item(j-1,3)->text().toInt();
+        W[j].mOp = 1;
+    }
+
+    //считаем количество оставшихся операций в работе для каждой операции
     int m = 1;
     a = 1;
     for (int j = 1; j <= NR; j++){
@@ -145,23 +174,28 @@ void generator::getworklist(){
             a = j+1;
         }
     }
+    //заполняем workSourse
     ui->work->update();
     ui->workSourse->setRowCount(ui->work->rowCount());
+
     for(int i = 0; i < ui->work->rowCount(); i++)
+    {
         for (int j = 0; j< ui->work->columnCount()-1; j++){
             QString s ="1";
             s = ui->work->item(i,j)->text();
             ui->workSourse->setItem(i,j,new QTableWidgetItem (s));
             ui->workSourse->setRowHeight(i,25);
         }
+    }
 }
+
+// возвращает свободное РМ в текущей ГРМ если есть
 int generator::GetFreeM(int G){
     for (int i = 1 ; i <= WG[G]; i++)
          if (!AGM[G][i]) return i;
     return -1;
-
-
 }
+
 void generator::StartDelayWork(){
     for (int n = 1; n <= Qwork; n++){
         if (T[n].Status == 1){
@@ -210,6 +244,8 @@ void generator::ShowWorkKONF(int raz, Twork *TTW){
         ui->KONF->setItem(i-1,9, new QTableWidgetItem(QString::number(TTW[i].mOp)));
     }
 }
+
+//процедура отображения массива работы на экран
 void generator::ShowWorkWORK(int raz, Twork *TTW){
     for (int i = 1 ; i <= raz; i++){
         ui->work->setItem(i-1,0, new QTableWidgetItem(QString::number(TTW[i].N)));
@@ -280,6 +316,8 @@ void generator::creatework(){
     ShowWorkWORK(NR,W);
     ShowBusyList();
 }
+
+//процедура для синхронизации списка работ и ФО
 void generator::synchronize(){
     for (int j = 1; j <= Qwork; j++)
         for(int n = 1; n <=NR; n++)
@@ -515,6 +553,8 @@ int generator::GetExt(QString S, int n){
     else if (CMG[n] == 2) return Result;
     return Result;
 }
+
+//переводит правила предпочтения в цифры
 int generator::GetNameNumber(QString x){
     for(int i  = 0; i<8;i++) {
         if (x == "min(tv)") return 0;
@@ -542,6 +582,7 @@ void generator::PutRow(int X){
         }
     }
 }
+
 void generator::SortZeroConf(int n){
     for (int j = 1; j <= CMG[n]; j++){
         if (CG[n][j] == 0 && CG[n][j+1] == 0 && j+1 != CMG[n] ){
@@ -595,18 +636,24 @@ void generator::autoClick(){
     }while(!EndWorks());
     CurTime--;
 }
+
+//выполнения и завершения тек работы
 void generator::DoWork(){
     for (int m = 1 ; m <= Qwork; m++){
+        // если работа выполняется
         if (T[m].Status == 2){
             T[m].ti--;
             T[m].S--;
         }
+        // если осташееся время выполнения работы =0
+
         if(T[m].ti == 0 && T[m].Status != 3){
-            T[m].Status=3;
+            T[m].Status=3; // обновляем статус на завершённый
             T[m].mOp--;
             int p = GetPlaceW(T[m]);
-            W[p]=T[m];
-            AGM[T[m].NG][T[m].nm]=0;
+            W[p]=T[m]; //синхронизируем с W
+            AGM[T[m].NG][T[m].nm]=0; // ос
+            //след операция у конкретной работы
             if (W[p].N == W[p+1].N){
                 W[p+1].Status=1;
                 W[p+1].mOp = T[m].mOp;
@@ -615,11 +662,18 @@ void generator::DoWork(){
         }
     }
 }
+
+
+//функция возвращает номер свободной РМ в ГРМ ?????
 int generator::GetPlaceW(Twork v){
     int k =-7;
-    for (int j =1; j <= NR; j++) if  (v.N==W[j].N&&v.No==W[j].No) k = j;
+    for (int j =1; j <= NR; j++)
+        if  (v.N==W[j].N&&v.No==W[j].No) k = j;
     return k;
 }
+
+
+//функция возвращает истину если все работы закончены
 bool generator::EndWorks(){
     bool result=false;
     int n =0 ;

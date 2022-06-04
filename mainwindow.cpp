@@ -30,6 +30,7 @@ int MainWindow::error(QListWidgetItem *item1){
             if (ui->geton->item(j)->text()=="max(tv)") return j;
     return  -1 ;
 }
+
 void MainWindow::on_getoff_itemDoubleClicked(QListWidgetItem *item)
 {
     QListWidget *getoff = ui->getoff, *geton=ui->geton;
