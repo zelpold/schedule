@@ -196,14 +196,17 @@ int generator::GetFreeM(int G){
     return -1;
 }
 
+//запуск работ со статусом ожидания
 void generator::StartDelayWork(){
     for (int n = 1; n <= Qwork; n++){
         if (T[n].Status == 1){
             T[n].nm = GetFreeM(T[n].NG);
-            if (T[n].nm > 0 && AGM[T[n].NG][T[n].nm] == 0) StartWork(T[n]);
+            //if (T[n].nm > 0 && AGM[T[n].NG][T[n].nm] == 0) StartWork(T[n]);
+            if (T[n].nm >= 0) StartWork(T[n]);
         }
     }
 }
+
 QString generator::OutStatus(int C){
     switch (C) {
     case 0: return "-";
@@ -265,12 +268,15 @@ QString generator::OutBusyM(int c){
     if (c==0) s = "-";
     return s;
 }
+
+//процедура отображения массива ГРМ на экран
 void generator::ShowBusyList(){
     ui->Busylist->clear();
     for (int j = 1; j <= NG; j++)
         for (int j1 =1; j1 <= WG[j]; j1++)
             ui->Busylist->setItem(j1-1,j-1, new QTableWidgetItem (OutBusyM(AGM[j][j1])));
 }
+
 void generator::creatework(){
     int j, n, mx;
 
@@ -317,12 +323,14 @@ void generator::creatework(){
     ShowBusyList();
 }
 
-//процедура для синхронизации списка работ и ФО
+//процедура для синхронизации списка работ и ФО (W и T)
 void generator::synchronize(){
     for (int j = 1; j <= Qwork; j++)
         for(int n = 1; n <=NR; n++)
             if (T[j].N == W[n].N && T[j].No == W[n].No) W[n] = T[j];
 }
+
+//обнуление массива конфликтов (Ошибок)
 void generator::cleanCA(){
     for (int i = 1; i <= 100; i++) CA[i] = 0;
     CM = 0;
@@ -332,6 +340,8 @@ void generator::cleanCA(){
         for (int j = 1; j <= 10; j++) CG[i][j] = 0;
     for (int i = 1; i <= 10 ; i++) CMG[i] = 0;
 }
+
+//подсчет конфликтов
 void generator::ConflictCount(){
     CM = 0;
     for (int i = 1; i <= Qwork; i++)
@@ -346,10 +356,14 @@ void generator::ConflictCount(){
                     }
                 }
         }
-    int z = 1, n = 1, i = 1;
+    // разносим конфликты по группам конфликтов
+    int z = 1, // номер группы конфликтов
+        n = 1, // номер конфликта
+        i = 1; // номер операции в гк
+
     if (CM > 0){
         do {
-            if (n+1 != CM+1){
+            if (n != CM){
                 if (T[CA[n]].NG == T[CA[n+1]].NG){
                     CG[z][i] = CA[n];
                     CMG[z]++;
@@ -370,10 +384,12 @@ void generator::ConflictCount(){
                 n++;
                 i = 1;
             }
-            CMGCount=z;
+            CMGCount=z; // количество групп конфликтов
         }while (!(n > CM));
     }
 }
+
+//вспомогательная процедура для хранения 'весов' операций
 void generator::FillCW(QString S, int n){
     switch (GetNameNumber(S)) {
         case 0:
@@ -399,8 +415,10 @@ void generator::FillCW(QString S, int n){
             break;
     }
 }
+
+//решение кофликтов
 void generator::ConflictSolve(){
-    if (CM > 0)
+    if (CM > 0) // конфликты есть
         for (int n = 1; n <= CMGCount; n++){
             do {
                 int G;
@@ -408,97 +426,100 @@ void generator::ConflictSolve(){
                 do {
                     G = GetExt(Names[k],n);
                     k++;
-                }while(!(G != -1  || k == NamesCount));
-                if (G != -1){
-                    T[G].nm = GetFreeM(T[G].NG);
+                }while(!(G != -1  || k == NamesCount)); // пока не разрешены конфликты и не закончились правила предпочтения
+                if (G != -1){ //если кофликты разрешены
+                    T[G].nm = GetFreeM(T[G].NG); //получаем номер рабочего места
                     if (T[G].nm > 0 && AGM[T[G].NG][T[G].nm] == 0){
-                        StartWork(T[G]);
+                        StartWork(T[G]); // запускаем работу
 
-                        CG[n][CGNOper] = 0;
+                        CG[n][CGNOper] = 0; //обнуляем конфликт для данной операции
                         SortZeroConf(n);
-                        CMG[n] = CMG[n]-1;
+                        CMG[n] = CMG[n]-1; //уменьшаем количество операций в гк
                     }
                 }
-                if(CG[n][1] == 0) break;
-            }while(GetFreeM(T[CG[n][1]].NG) != -1);
+                if(CG[n][1] == 0) break; // если кофнфликты были решён для всех операций в данной гк
+            }while(GetFreeM(T[CG[n][1]].NG) != -1);// пока данная грм не полностью занята
         }
 }
+
+// запуск конкретной операции
 void generator::StartWork(Twork &TT){
     TT.Status = 2;
     TT.tn = CurTime;
     AGM[TT.NG][TT.nm] = 1;
 }
+
+//функция для получения экстремума
 int generator::GetExt(QString S, int n){
     int mx;
+    // обнуляем веса
     for(int i = 1; i <= 100; i++){ CW[i] = 0;}
     int k = 0;
-    FillCW(S,n);
+    FillCW(S,n); // заполняем веса в соответствии с правилом предпочтения
     int G = -1;
     int Result =-1;
     switch (GetNameNumber(S)){
     case 0:{
-            mx = 1000;
-            for (int j = 1; j <= CMG[n]; j++)
-                if (mx > CW[j]){
-                    mx = CW[j];
-                    G = CG[n][j];
-                    k = j;
-                }
+        mx = 1000;
+        for (int j = 1; j <= CMG[n]; j++)
+            if (mx > CW[j]){
+                mx = CW[j];
+                G = CG[n][j];
+                k = j;
+            }
         break;
-    }
+    }   //min(tv)
     case 1:{
-            mx = 1000;
-            for (int j = 1; j <= CMG[n]; j++)
-                if (mx > CW[j]){
-                    mx = CW[j];
-                    G = CG[n][j];
-                    k = j;
-                }
-
+        mx = 1000;
+        for (int j = 1; j <= CMG[n]; j++)
+            if (mx > CW[j]){
+                mx = CW[j];
+                G = CG[n][j];
+                k = j;
+            }
         break;
-    }
+    }   //min(S)
     case 2:{
-            mx = 0;
-            for (int j = 1; j <= CMG[n]; j++){
-                if(mx < CW[j]){
-                    mx = CW[j];
-                    G =CG[n][j];
-                    k = j;
-                }
+        mx = 0;
+        for (int j = 1; j <= CMG[n]; j++){
+            if(mx < CW[j]){
+                mx = CW[j];
+                G =CG[n][j];
+                k = j;
             }
-        break;}
-
+        }
+        break;
+    } //max(tv)
     case 3:{
-            mx = 0;
-            for (int j = 1; j <= CMG[n]; j++){
-                if(mx < CW[j]){
-                    mx = CW[j];
-                    G = CG[n][j];
-                    k = j;
-                }
+        mx = 0;
+        for (int j = 1; j <= CMG[n]; j++){
+            if(mx < CW[j]){
+                mx = CW[j];
+                G = CG[n][j];
+                k = j;
             }
+        }
         break;
-    }
+    } //max(S)
     case 4:{
-            CM = 0;
-            return CA[1];
-            break;
-    }
-    case 5:
-    {
-            int mx = 1000;
-            for (int j = 1; j <= CMG[n]; j++){
-                if (mx > CW[j]){
-                    mx = CW[j];
-                    G=CG[n][j];
-                    k = j;
-                }
-            }
+        CM = 0;
+        return CA[1];
         break;
-    }
+    } //FIFO
+    case 5:{
+        int mx = 1000;
+        for (int j = 1; j <= CMG[n]; j++){
+            if (mx > CW[j]){
+                mx = CW[j];
+                G=CG[n][j];
+                k = j;
+            }
+        }
+        break;
+    } //min(Op)
     case 6:
 
-        break;
+        break; // user 1
 
     case 7: {
         user *userw = new user(this);
@@ -527,9 +548,11 @@ int generator::GetExt(QString S, int n){
         }
         Result = G;
         for (int j = 1; j <= CMG[n]; j++) if (CG[n][j] == G) CGNOper = j;
-        break;}
+        break;
+    }// user
     }
-    bool DB = false;
+    //проверка на двойной экстремум
+    bool DB = false; // если в данной гк встречены одинаковые веса для разных операций
     for(int j = 1; j <= CMG[n]; j++){
         if (k != j && mx == CW[j]) DB = true;
     }
@@ -537,6 +560,7 @@ int generator::GetExt(QString S, int n){
         Result = G;
         CGNOper = k;
     }
+
     else if (CMG[n] != 2) {
         for (int j = 1; j <= CMG[n]; j++){
             if (mx != CW[j]) CG[n][j] = 0;
@@ -550,7 +574,7 @@ int generator::GetExt(QString S, int n){
             }
         }
     }
-    else if (CMG[n] == 2) return Result;
+    //else if (CMG[n] == 2) return Result;
     return Result;
 }
 
@@ -567,14 +591,16 @@ int generator::GetNameNumber(QString x){
         if (x == "USER") return 7;
     }
 }
+
+// поиск конфликтов и занесение их в память
 void generator::PutRow(int X){
-    bool exist;
+    // eсли счётчик конфликтов = 0
     if (CM == 0){
         CM = 1;
         CA[CM] = X;
     }
     else{
-        exist = false;
+        bool exist = false;
         for (int i = 1; i <= CM ; i++)
             if ( CA[i] == X) exist = 1 ;
         if (!exist){
@@ -583,6 +609,7 @@ void generator::PutRow(int X){
     }
 }
 
+//сортировка массива конфликтов с нулями
 void generator::SortZeroConf(int n){
     for (int j = 1; j <= CMG[n]; j++){
         if (CG[n][j] == 0 && CG[n][j+1] == 0 && j+1 != CMG[n] ){
@@ -637,7 +664,7 @@ void generator::autoClick(){
     CurTime--;
 }
 
-//выполнения и завершения тек работы
+//выполнения и завершения текущей работы
 void generator::DoWork(){
     for (int m = 1 ; m <= Qwork; m++){
         // если работа выполняется
@@ -652,8 +679,8 @@ void generator::DoWork(){
             T[m].mOp--;
             int p = GetPlaceW(T[m]);
             W[p]=T[m]; //синхронизируем с W
-            AGM[T[m].NG][T[m].nm]=0; // ос
-            //след операция у конкретной работы
+            AGM[T[m].NG][T[m].nm]=0; // освобождаем рм
+            //следующая операция у конкретной работы
             if (W[p].N == W[p+1].N){
                 W[p+1].Status=1;
                 W[p+1].mOp = T[m].mOp;
