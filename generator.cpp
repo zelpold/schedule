@@ -209,12 +209,14 @@ void generator::StartDelayWork(){
 
 QString generator::OutStatus(int C){
     switch (C) {
-    case 0: return "-";
-    case 1: return "О";
-    case 2: return "И";
-    case 3: return "F";
+        case 0: return "-";
+        case 1: return "О";
+        case 2: return "И";
+        case 3: return "F";
+        default: return "-";
     }
 }
+
 QString generator::OutUndef(int C){
     if (C == -1) return "-";
     else return QString::number(C);
@@ -633,18 +635,28 @@ void generator::on_step_clicked()
     CurTime++;
     ui->time->setText(QString::number(CurTime));
     ui->log->clear();
+    //выполняем работы которые в статусе выполнения статус = 2;
     DoWork();
+    //отображаем файл обмена первый просмотр
     ShowWorkFO(Qwork,T);
+    //обнуляем конфликты прошлого шага
     cleanCA();
+    //считаем конфликты
     ConflictCount();
+    //решаем конфликты
     ConflictSolve();
+    //запускаем работы со статусом ожидания
     StartDelayWork();
+    //отображаем занятость рм
     ShowBusyList();
+    //файл обмена после разрешения кофликтов
     ShowWorkKONF(Qwork,T);
     synchronize();
+    //отображаем список работ
     ShowWorkWORK(NR,W);
     if(EndWorks()) CurTime--;
 }
+
 void generator::autoClick(){
     do {
         CurTime++;
@@ -702,13 +714,10 @@ int generator::GetPlaceW(Twork v){
 
 //функция возвращает истину если все работы закончены
 bool generator::EndWorks(){
-    bool result=false;
-    int n =0 ;
     for (int m = 0; m < NR; m++){
-        if (ui->work->item(m, 4)->text() == "F") n++;
-        if (n == NR) result = true ;
+        if (ui->work->item(m, 4)->text() != "F") return false;
     }
-    return result;
+    return true;
 }
 
 void generator::on_auto_2_clicked()
