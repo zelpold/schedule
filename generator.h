@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidget>
+#include <QDebug>
 #include "user.h"
 #include "gnatt.h"
 struct Twork{

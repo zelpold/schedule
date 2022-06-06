@@ -2,6 +2,7 @@
 #include "ui_generator.h"
 #include "mainwindow.h"
 #include "user.h"
+
 generator::generator(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::generator)
@@ -748,9 +749,24 @@ void generator::on_KD_clicked()
         gant->W[i].No=W[i].No;
         gant->W[i].Tn=W[i].tn;
         gant->W[i].Tv=W[i].tv;
+        gant->W[i].NG = W[i].NG;
+        gant->W[i].Nm = W[i].nm;
     }
+    int rows = 0;
+    for (int i = 0; i < NG ; i++)
+    {
+
+        rows += matrix3[i];
+        for (int j = rows-matrix3[i]; j < rows; j++){
+            gant->index_map[QString::number(i+1) + "-" + QString::number(j+1 - rows+matrix3[i])] = j;
+            gant->index_map_reverse[j] = QString::number(i+1) + "-" + QString::number(j+1 - rows+matrix3[i]);
+        }
+    }
+    gant->rows = rows;
     gant->time = CurTime;
+    qDebug() <<"ok1";
     gant->createtable();
+    qDebug() <<"ok2";
     gant->setModal(true);
     this->hide();
     gant->exec();
