@@ -188,6 +188,7 @@ void MainWindow::on_random3_clicked()
 void MainWindow::on_next_clicked()
 {
 
+
     if (window->Qoper != Op &&
         window->matrix1[0][0]!=ui->matrix1->item(0,0)->text().toInt()){
     window->Qoper = Op;
@@ -216,3 +217,151 @@ void MainWindow::on_next_clicked()
     }
 
 }
+
+void MainWindow::on_saveButton_clicked()
+{
+    QJsonObject saved_object;
+    QString saveFileName = QFileDialog::getSaveFileName(this,
+                                                            tr("Save Json File"),
+                                                            QString(),
+                                                            tr("JSON (*.json)"));
+    QFileInfo fileInfo(saveFileName);   // С помощью QFileInfo
+    QDir::setCurrent(fileInfo.path());  // установим текущую рабочую директорию, где будет файл, иначе может не заработать
+    // Создаём объект файла и открываем его на запись
+    qDebug() <<"ok1";
+    QFile jsonFile(saveFileName);
+    if (!jsonFile.open(QIODevice::WriteOnly))
+    {
+        return;
+    }
+
+    QJsonArray json_matrix_time, json_matrix_tech, json_vector_group,json_rules;
+    for( int i=0; i < ui->matrix1->rowCount(); ++i)
+    {
+        QJsonArray array_json_1;
+        QJsonArray array_json_2;
+        for (int j=0; j < ui->matrix1->columnCount();++j)
+        {
+            array_json_1.append(ui->matrix1->item(i,j)->text().toInt());
+            array_json_2.append(ui->matrix2->item(i,j)->text().toInt());
+        }
+        json_matrix_time.append(array_json_2);
+        json_matrix_tech.append(array_json_1);
+
+    }
+    for (int i = 0; i < ui->matrix3->columnCount(); ++i)
+    {
+        json_vector_group.append(ui->matrix3->item(0,i)->text().toInt());
+    }
+    for (int i =0; i<ui->geton->count();++i)
+    {
+        json_rules.append(ui->geton->item(i)->text());
+    }
+
+    saved_object["num_work"]    = ui->countR->text().toInt();
+    saved_object["num_op"]      = ui->countO->text().toInt();
+    saved_object["num_groups"]  = ui->countm3->text().toInt();
+    saved_object["matrix_time"] = json_matrix_time;
+    saved_object["matrix_tech"] = json_matrix_tech;
+    saved_object["groups"]      = json_vector_group;
+    saved_object["rules"]       = json_rules;
+    // Записываем текущий объект Json в файл
+    jsonFile.write(QJsonDocument(saved_object).toJson(QJsonDocument::Indented));
+    jsonFile.close();   // Закрываем файл
+}
+
+
+void MainWindow::on_loadButton_clicked()
+{
+    // Выбираем файл
+    QString openFileName = QFileDialog::getOpenFileName(this,
+                                                        tr("Open Json File"),
+                                                        QString(),
+                                                        tr("JSON (*.json)"));
+    QFileInfo fileInfo(openFileName);   // С помощью QFileInfo
+    QDir::setCurrent(fileInfo.path());  // установим текущую рабочую директорию, где будет файл
+    // Создаём объект файла и открываем его на чтение
+    QFile jsonFile(openFileName);
+    if (!jsonFile.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
+
+    // Считываем весь файл
+    QByteArray saveData = jsonFile.readAll();
+    QJsonDocument jsonDocument(QJsonDocument::fromJson(saveData));
+    QJsonObject loaded_object;
+    loaded_object = jsonDocument.object();
+    if(loaded_object.contains("num_op") && loaded_object["num_op"].isString())
+        ui->countO->setText(loaded_object["num_op"].toString());
+    if(loaded_object.contains("num_work") && loaded_object["num_work"].isString())
+        ui->countR->setText(loaded_object["num_work"].toString());
+    if(loaded_object.contains("num_groups") && loaded_object["num_groups"].isString())
+        ui->countm3->setText(loaded_object["num_op"].toString());
+    ui->matrix2->clear();
+    ui->matrix1->clear();
+    ui->matrix3->clear();
+    ui->geton->clear();
+    ui->matrix2->setRowCount( ui->countR->text().toInt());
+    ui->matrix2->setColumnCount( ui->countO->text().toInt());
+    ui->matrix1->setRowCount( ui->countR->text().toInt());
+    ui->matrix1->setColumnCount( ui->countO->text().toInt());
+    ui->matrix3->setRowCount(1);
+    ui->matrix3->setColumnCount(ui->countm3->text().toInt());
+    if(loaded_object.contains("matrix_time") && loaded_object["matrix_time"].isArray())
+    {
+        QJsonArray json_matrix_time, row;
+        json_matrix_time = loaded_object["matrix_time"].toArray();
+        for (int i = 0; i < json_matrix_time.size() && i < ui->matrix2->rowCount(); ++i)
+        {
+            if (json_matrix_time[i].isArray()) {
+                row = json_matrix_time[i].toArray();
+                for (int j = 0; j<row.size() && j < ui->matrix2->columnCount(); ++j)
+                {
+                    ui->matrix2->setItem(i,j, new QTableWidgetItem(QString::number(row[j].toInt())));
+                }
+            }
+
+        }
+    }
+    if(loaded_object.contains("matrix_tech") && loaded_object["matrix_tech"].isArray())
+    {
+        QJsonArray json_matrix_tech, row;
+        json_matrix_tech = loaded_object["matrix_time"].toArray();
+        for (int i = 0; i < json_matrix_tech.size() && i < ui->matrix1->rowCount(); ++i)
+        {
+            if (json_matrix_tech[i].isArray())
+            {
+                row = json_matrix_tech[i].toArray();
+                for (int j = 0; j<row.size() && j < ui->matrix1->columnCount(); ++j)
+                {
+                    ui->matrix1->setItem(i,j, new QTableWidgetItem(QString::number(row[j].toInt())));
+                }
+            }
+
+        }
+    }
+    if(loaded_object.contains("rules") && loaded_object["rules"].isArray())
+    {
+        QJsonArray json_rules;
+        json_rules = loaded_object["rules"].toArray();
+        for (int i = 0; i < json_rules.size();++i)
+        {
+            ui->geton->addItem(json_rules[i].toString());
+        }
+    }
+    if(loaded_object.contains("groups") && loaded_object["groups"].isArray())
+    {
+
+        QJsonArray json_groups;
+        json_groups = loaded_object["groups"].toArray();
+        for (int i = 0; i < json_groups.size();++i)
+        {
+            ui->matrix3->setItem(0,i, new QTableWidgetItem(QString::number(json_groups[i].toInt())));
+        }
+    }
+    jsonFile.close();
+}
+
+
+
