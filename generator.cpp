@@ -125,7 +125,7 @@ void generator::getworklist(){
     }while(a != ui->work->rowCount());
 
     //очищаем массив работ
-    for ( int i = 1 ; i <= 100 ; i++ ){
+    for ( int i = 1 ; i <= 10000 ; i++ ){
         W[i].N=0;
         W[i].No=0;
         W[i].mOp=0;
@@ -335,13 +335,13 @@ void generator::synchronize(){
 
 //обнуление массива конфликтов (Ошибок)
 void generator::cleanCA(){
-    for (int i = 1; i <= 100; i++) CA[i] = 0;
+    for (int i = 1; i <= 10000; i++) CA[i] = 0;
     CM = 0;
     CMGCount = 0;
     CGNOper = 0;
-    for (int i = 1; i <= 5; i++)
-        for (int j = 1; j <= 10; j++) CG[i][j] = 0;
-    for (int i = 1; i <= 10 ; i++) CMG[i] = 0;
+    for (int i = 1; i <= 100; i++)
+        for (int j = 1; j <= 100; j++) CG[i][j] = 0;
+    for (int i = 1; i <= 100 ; i++) CMG[i] = 0;
 }
 
 //подсчет конфликтов
@@ -456,7 +456,7 @@ void generator::StartWork(Twork &TT){
 int generator::GetExt(QString S, int n){
     int mx;
     // обнуляем веса
-    for(int i = 1; i <= 100; i++){ CW[i] = 0;}
+    for(int i = 1; i <= 10000; i++){ CW[i] = 0;}
     int k = 0;
     FillCW(S,n); // заполняем веса в соответствии с правилом предпочтения
     int G = -1;
@@ -506,7 +506,8 @@ int generator::GetExt(QString S, int n){
     } //max(S)
     case 4:{
         CM = 0;
-        return CA[1];
+        //return CA[1];
+        return  CG[n][1];
         break;
     } //FIFO
     case 5:{
@@ -526,7 +527,7 @@ int generator::GetExt(QString S, int n){
 
     case 7: {
         user *userw = new user(this);
-        for(int i = 1; i <= 100; i++ ){
+        for(int i = 1; i <= 10000; i++ ){
             userw->T[i].N=T[i].N;
             userw->T[i].NG=T[i].NG;
             userw->T[i].No=T[i].No;
@@ -744,7 +745,9 @@ void generator::on_auto_2_clicked()
 void generator::on_KD_clicked()
 {
     gnatt *gant = new gnatt(this);
-    for (int i = 1; i < 101; i++ ){
+    qDebug() << "OK1";
+    for (int i = 1; i < 10001; i++ )
+    {
         gant->W[i].N=W[i].N;
         gant->W[i].No=W[i].No;
         gant->W[i].Tn=W[i].tn;
@@ -752,26 +755,24 @@ void generator::on_KD_clicked()
         gant->W[i].NG = W[i].NG;
         gant->W[i].Nm = W[i].nm;
     }
+    qDebug() << "OK2";
     int rows = 0;
     for (int i = 0; i < NG ; i++)
     {
-
         rows += matrix3[i];
-        for (int j = rows-matrix3[i]; j < rows; j++){
+        for (int j = rows-matrix3[i]; j < rows; j++)
+        {
             gant->index_map[QString::number(i+1) + "-" + QString::number(j+1 - rows+matrix3[i])] = j;
             gant->index_map_reverse[j] = QString::number(i+1) + "-" + QString::number(j+1 - rows+matrix3[i]);
         }
     }
     gant->rows = rows;
     gant->time = CurTime;
-    qDebug() <<"ok1";
     gant->createtable();
-    qDebug() <<"ok2";
     gant->setModal(true);
     this->hide();
     gant->exec();
     if (gant->close()) this->show();
-
 }
 
 void generator::on_pushButton_4_clicked()

@@ -28,8 +28,8 @@ public:
     ~user();
     int getdata() ;
     void createuserTable(int n , int CMG_n, int CG_n);
-    TTwork T[101];
-    int CG[6][11];
+    TTwork T[10001];
+    int CG[101][101];
 private:
     Ui::user *ui;
 };

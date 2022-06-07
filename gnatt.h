@@ -26,7 +26,7 @@ public:
     QMap<QString, int> index_map;
     QMap<int, QString> index_map_reverse;
     ~gnatt();
-    work W[101];
+    work W[10001];
     void createtable();
     int time;
 

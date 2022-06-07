@@ -56,7 +56,7 @@ void gnatt::createtable(){
         ui->graf->setColumnWidth(i,20);
     }
     for (int i = 0; i < ui->graf->rowCount();i++) ui->graf->setRowHeight(i,25);
-    for(int i = 1; i < 101 ; i++){
+    for(int i = 1; i < 10001 ; i++){
         if (W[i].N==0) break;
         for(int j = W[i].Tn; j < W[i].Tv+W[i].Tn; j++){
 
