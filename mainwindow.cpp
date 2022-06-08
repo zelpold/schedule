@@ -116,6 +116,7 @@ void MainWindow::on_randomtm_clicked()
 {
     static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
     int left = ui->randomBorderTmLeft->text().toInt(), right = ui->randomBorderTmRight->text().toInt();
+    int left_t = ui->min_t->text().toInt(), right_t = ui->max_t->text().toInt();
     MainWindow::on_creatematrix_clicked();
     srand(static_cast<unsigned int>(time(0)));
     int randd = static_cast<int>(rand()* fraction *(right - left + 1) + left);
@@ -133,8 +134,11 @@ void MainWindow::on_randomtm_clicked()
                     ui->matrix1->setItem(i,j,new QTableWidgetItem("0"));
                 }
                 else{
+                    QString t;
+                    do{
                     int rands = static_cast<int>(rand()* fraction *(right - left + 1) + left);
-                    QString t= QString::number(rands);
+                    t= QString::number(rands);
+                    }while(t == ui->matrix1->item(i,j-1)->text());
                     ui->matrix1->setItem(i,j,new QTableWidgetItem(t));
                 }
             }
@@ -146,7 +150,7 @@ void MainWindow::on_randomtm_clicked()
                 }
                 else{
                     if(!left) left++;
-                    int rands = static_cast<int>(rand()* fraction *(right - left + 1) + left);
+                    int rands = static_cast<int>(rand()* fraction *(right_t - left_t + 1) + left_t);
                     QString t= QString::number(rands);
                     ui->matrix2->setItem(i,j,new QTableWidgetItem(t));
                 }

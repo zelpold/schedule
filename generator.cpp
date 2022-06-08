@@ -8,6 +8,7 @@ generator::generator(QWidget *parent) :
     ui(new Ui::generator)
 {
     ui->setupUi(this);
+    userw = new user(this);
 }
 
 generator::~generator()
@@ -526,7 +527,7 @@ int generator::GetExt(QString S, int n){
         break; // user 1
 
     case 7: {
-        user *userw = new user(this);
+//        user *userw = new user(this);
         for(int i = 1; i <= 10000; i++ ){
             userw->T[i].N=T[i].N;
             userw->T[i].NG=T[i].NG;
@@ -539,19 +540,21 @@ int generator::GetExt(QString S, int n){
             userw->T[i].tv=T[i].tv;
             userw->T[i].mOp=T[i].mOp;
         }
-        for (int i = 1; i < 6 ; i++){
+        for (int i = 1; i < 101 ; i++){
 
-            for (int j = 1; j < 11; j++) userw->CG[i][j] = CG[i][j];
+            for (int j = 1; j < 101; j++) userw->CG[i][j] = CG[i][j];
         }
+
         userw->createuserTable(n, CMG[n], CG[n][1]);
         userw->setModal(true);
 
         if( userw->exec() == QDialog::Accepted){
             G = userw->getdata();
-
         }
+
         Result = G;
         for (int j = 1; j <= CMG[n]; j++) if (CG[n][j] == G) CGNOper = j;
+        //delete userw;
         break;
     }// user
     }
