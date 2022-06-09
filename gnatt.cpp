@@ -80,8 +80,50 @@ void gnatt::createtable(){
         }
 
     }
+
+
 }
 void gnatt::on_back_clicked()
 {
     close();
+}
+
+void gnatt::on_timeButton_clicked()
+{
+    QDate start_date = ui->startDate->date();
+    ui->graf->insertColumn(0);
+    ui->graf->setHorizontalHeaderItem(0, new QTableWidgetItem(start_date.toString("dd.MM.yyyy")));
+    int column_count = ui->graf->colorCount();
+    QTime start = ui->startDayTime->time();
+    QTime end = ui->stopDayTime->time();
+    QTime delta = ui->delta->time();
+    QTime second_time = start;
+    long msec_second  = second_time.msecsSinceStartOfDay();
+    long msec_end  = end.msecsSinceStartOfDay();
+    long msec_delta  = delta.msecsSinceStartOfDay();
+    if (msec_end <= msec_second) msec_end += 24*60*60*1000;
+
+    for (int i = 1; i < column_count; ++i)
+    {
+
+
+
+        qDebug() << second_time << end;
+        if (msec_delta+msec_second > msec_end)
+        {
+            start_date = start_date.addDays(1);
+            ui->graf->insertColumn(i);
+            ui->graf->setHorizontalHeaderItem(i, new QTableWidgetItem(start_date.toString("dd.MM.yyyy")));
+            ++i;
+            ++column_count;
+            second_time = start;
+            msec_second = second_time.msecsSinceStartOfDay();
+
+        }
+
+
+        ui->graf->setHorizontalHeaderItem(i, new QTableWidgetItem(second_time.toString("hh:mm")));
+        second_time=second_time.addMSecs(delta.msecsSinceStartOfDay());
+        msec_second+=msec_delta;
+    }
 }

@@ -37,6 +37,8 @@ public:
 private slots:
     void on_back_clicked();
 
+    void on_timeButton_clicked();
+
 private:
     Ui::gnatt *ui;
     int Colo[10][3];
